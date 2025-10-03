@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.5s;
+        }
+
+        .container {
+            background: rgba(228, 227, 227, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.25);
+            padding: 40px 28px 32px 28px;
+            width: 340px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: box-shadow 0.3s;
+        }
+
+        .container:hover {
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.32);
+        }
+
+        .input {
+            display: flex;
+            width: 100%;
+            margin-bottom: 28px;
+        }
+
+        .input input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 1px solid #b3b3b3;
+            border-radius: 8px 0 0 8px;
+            outline: none;
+            font-size: 17px;
+            background: #f7fafd;
+            transition: border 0.2s;
+        }
+
+        .input input:focus {
+            border-color: #74ebd5;
+            background: #eaf6fb;
+        }
+
+        .input button {
+            padding: 12px 22px;
+            border: none;
+            background: linear-gradient(90deg, #74ebd5 0%, #ACB6E5 100%);
+            color: #333;
+            font-weight: bold;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(116,235,213,0.08);
+        }
+
+        .input button:hover {
+            /* background: linear-gradient(90deg, #ACB6E5 0%, #74ebd5 100%); */
+            color: #0077b6;
+        }
+
+        .weather-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .icon img {
+            width: 150px;
+            height: 150px;
+            filter: drop-shadow(0 2px 8px #74ebd5d5);
+        }
+
+        .weather {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            letter-spacing: 0.5px;
+        }
+
+        .temperature {
+            font-size: 38px;
+            font-weight: bold;
+            color: #0077b6;
+            text-shadow: 0 2px 8px #74ebd544;
+        }
+
+        .description {
+            font-size: 17px;
+            color: #555;
+            text-transform: capitalize;
+            letter-spacing: 0.2px;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 400px) {
+            .container {
+                width: 98vw;
+                padding: 18px 4vw;
+            }
+            .input input, .input button {
+                font-size: 15px;
+                padding: 10px 8px;
+            }
+            .icon img {
+                width: 70px;
+                height: 70px;
+            }
+            .temperature {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input">
+            <input type="text"
+            placeholder="Enter City Name.....">
+            <button id="btn">Search</button>
+        </div>
+        <div class="weather-box">
+            <div class="icon"></div>
+            <div class="weather"></div>
+            <div class="temperature"></div>
+            <div class="description"></div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.querySelector("input");
+        const btn = document.getElementById("btn")
+        const icon = document.querySelector(".icon");
+        const weather = document.querySelector(".weather");
+        const temperature = document.querySelector(".temperature");
+        const description = document.querySelector(".description");
+
+        const apiKey ='fa4858bd44333d909f0f95108c2f7781';
+
+        btn.addEventListener("click",()=>{
+            let city = input.value;
+            getWeather(city)
+        })
+        function getWeather(city){
+            console.log(city);
+
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`).then(response=>response.json()).then(data=>{console.log(data)
+                const iconCode = data.weather[0].icon;
+                icon.innerHTML=`<img src="http://openweathermap.org/img/wn/${iconCode}.png" alt="weather Icon">`
+
+                const weatherCity = data.name;
+                const weatherCountry = data.sys.country;
+                weather.innerHTML=`${weatherCity},${weatherCountry}`;
+
+
+                let weatherTemp = data.main.temp;
+                weatherTemp = weatherTemp - 273;
+                let temp = weatherTemp.toFixed(2);
+                temperature.innerHTML = `${temp}&#8451;`;
+
+                const weatherDesc = data.weather[0].description;
+                description.innerHTML= weatherDesc
+            })
+        }
+
+
+        
+    </script>
+</body>
+</html>
+
+<!-- https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={APIkey}
+fa4858bd44333d909f0f95108c2f7781 -->
