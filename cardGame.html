@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #2e3d49;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-gap: 15px;
+            margin-top: 60px;
+            justify-content: center;
+        }
+        .card {
+            width: 80px;
+            height: 110px;
+            background: #1e2936;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+           
+            user-select: none;
+            perspective: 600px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+        .card.flipped {
+            background: #ffd700;
+            color: #222;
+            font-weight: bold;
+            cursor: default;
+            transform: rotateY(180deg);
+            
+        }
+        .reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-board">
+
+    </div>
+    <button class="reset-button">Reset Game</button>
+
+    <script>
+        // Array of pairs of numbers for the cards
+        const numbers = [	1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8];
+        let flippedCards = []; // Currently flipped cards
+        let matchedPairs = []; // Matched cards
+        let canFlip = true; // Control flipping
+        const gameBoard = document.querySelector('.game-board');
+
+        // Create a card element
+        function createCard(number) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.number = number;
+            card.textContent = '?';
+            card.addEventListener('click', flipCard);
+            return card;
+        }
+
+        // Handle card flip
+        function flipCard() {
+            if (!canFlip || this.classList.contains('flipped') || flippedCards.includes(this)) {
+            return;
+            }
+            this.classList.add('flipped');
+            this.textContent = this.dataset.number;
+        
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+            canFlip = false;
+            checkMatch();
+            }
+        }
+
+        // Check if two flipped cards match
+        function checkMatch() {
+            setTimeout(() => {
+            const [card1, card2] = flippedCards;
+            if (card1.dataset.number === card2.dataset.number) {
+                matchedPairs.push(card1, card2);
+                // Keep matched cards flipped
+                if (matchedPairs.length === numbers.length) {
+                alert("You win!");
+                resetGame();
+                }
+            } else {
+                // Flip back if not matched
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '?';
+                card2.textContent = '?';
+            }
+            flippedCards = [];
+            canFlip = true;
+            }, 1000);
+        }
+
+        // Initialize the game
+        function initGame() {
+            numbers.sort(() => Math.random() - 0.5); // Shuffle cards
+            numbers.forEach(number => {
+            const card = createCard(number);
+            gameBoard.appendChild(card);
+            });
+        }
+
+        function resetGame(){
+            gameBoard.innerHTML = ''; // Clear the board
+            flippedCards = [];
+            matchedPairs = [];
+            canFlip = true;
+            initGame(); // Reinitialize the game
+        }
+        // Reset button functionality
+        document.querySelector('.reset-button').addEventListener('click', resetGame);
+
+        initGame();
+
+
+
+    </script>
+</body>
+</html>
