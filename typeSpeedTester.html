@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+          min-height: 100vh;
+          display: flex;
+          padding: 0 10px;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #ff9800 0%, #ffcc80 100%);
+          font-family: cursive;
+        }
+
+        .wrapper {
+          width: 100%;
+          max-width: 800px;
+          padding: 40px 35px 35px 35px;
+          background: rgba(255,255,255,0.95);
+          border-radius: 18px;
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+          border: 1px solid rgba(255,255,255,0.18);
+          backdrop-filter: blur(8px);
+          transition: box-shadow 0.3s;
+        }
+
+        .wrapper:hover {
+          box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.35);
+        }
+
+        .wrapper .input-field {
+            padding: 13px 20px 0;
+            position:absolute;
+            opacity: 0;
+            z-index: -99;
+        }
+
+        .content-box {
+            margin-top: 20px;
+        }
+
+        .typing-text p {
+            font-size: 1.35rem;
+            color: #333;
+            line-height: 2.2;
+            letter-spacing: 0.015em;
+            margin-bottom: 0;
+            min-height: 70px;
+            word-break: break-word;
+            user-select: none;
+            background: linear-gradient(90deg, #fffbe7 60%, #ffe0b2 100%);
+            border-radius: 8px;
+            padding: 18px 22px;
+            box-shadow: 0 2px 12px rgba(255, 152, 0, 0.08);
+            transition: box-shadow 0.2s, background 0.2s;
+        }
+        .typing-text p:hover {
+            box-shadow: 0 4px 18px rgba(255, 152, 0, 0.18);
+            background: linear-gradient(90deg, #fff3e0 60%, #ffe0b2 100%);
+        }
+
+        .result-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 28px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            padding: 18px 24px;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.07);
+        }
+
+        .result-details li {
+            list-style-type: none;
+            font-size: 1.1rem;
+            color: #495057;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 10px;
+        }
+
+        .result-details span {
+            font-weight: bold;
+            margin-top: 4px;
+            font-size: 1.2rem;
+            color: #ff9800;
+        }
+
+        .result-details p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #888;
+        }
+
+        button {
+            padding: 12px 22px;
+            background: linear-gradient(90deg, #ff9800 60%, #ffb74d 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.13);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #ffb74d 0%, #ff9800 100%);
+            box-shadow: 0 4px 16px rgba(255, 152, 0, 0.18);
+        }
+
+        .typing-text p span{
+            position: relative;
+            padding: 2px 1.5px;
+            border-radius: 3px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .typing-text p span.active{
+            color: #fff;
+            background: #ff9800;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.13);
+            animation: blink 1s steps(1) infinite;
+        }
+        @keyframes blink {
+            50% { background: #ffb74d; color: #fff; }
+        }
+        .typing-text p span.correct{
+            color: #1bdf35;
+            background: #e8f5e9;
+        }
+        .typing-text p span.incorrect{
+            color: #df381b;
+            background: #fde0dc;
+        }
+        ::selection{
+            background: #ff9800;
+            color: #fff;
+        }
+        
+        #userInput {
+            width: 65%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 900px) {
+          .wrapper {
+            max-width: 98vw;
+            padding: 18px 6vw;
+          }
+          .result-details {
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 10px;
+          }
+        }
+        @media (max-width: 600px) {
+          .wrapper {
+            padding: 10px 2vw;
+          }
+          .typing-text p {
+            font-size: 1rem;
+          }
+        }
+    </style>
+
+    <title>Typing Speed Tester</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+     
+</head>
+<body>
+    <div class="wrapper">
+        <input type="text" class="input-field" placeholder="Type here..." id="inputField">
+        <div class="content-box">
+            <div class="typing-text">
+                <p></p>
+
+            </div>
+            <div class="content">
+                <div class="result-details">
+                    <li class="time">
+                        <span><b>60</b>s</span>
+                    </li>
+                    <li class="mistake">
+                        <p>Mistake</p>
+                        <span>0</span>
+                    </li>
+                    <li class="wpm">
+                        <p>Wpm</p>
+                        <span>0</span>
+                    </li>
+                    <li class="cpm">
+                        <p>Cpm</p>
+                        <span>0</span>
+                    </li>
+                    <button>Try Again</button>
+                </div>
+            </div>
+        </div>
+        <div> 
+            <input type="text" id="userInput" placeholder="Paste here Your Own Text for practice...">
+            <button id="ownPracticeBtn">Own Practice Words
+                <i class="fas fa-play"></i>
+            </button>
+        
+        </div>
+    </div>
+
+
+    <script>
+        const typingText = document.querySelector('.typing-text p');
+        const input = document.querySelector('.wrapper .input-field');
+        const time = document.querySelector(' .time span b');
+        const mistakeSpan = document.querySelector('.mistake span');
+        const wpm = document.querySelector('.wpm span');    
+        const cpm = document.querySelector('.cpm span');
+        const button = document.querySelector('button');
+        const userInput = document.getElementById('userInput').value;
+        const ownPracticeBtn = document.getElementById('ownPracticeBtn');
+
+        ownPracticeBtn.addEventListener('click', () => {
+            const userInput = document.getElementById('userInput').value;
+            if (userInput.trim() === '') {
+                alert('Please enter some text to practice.');
+                return;
+            }
+            typingText.innerHTML = '';
+            for (const char of userInput) {
+                typingText.innerHTML += `<span>${char}</span>`;
+            }   
+            typingText.querySelectorAll('span')[0].classList.add('active');
+            document.addEventListener('keydown', () => input.focus());
+            typingText.addEventListener("click", () => { input.focus() });
+            input.value = ''; // Clear the input field
+            input.focus(); // Focus on the input field
+            // Reset the typing game state
+            time.textContent = '60'; // Reset time
+            mistakeSpan.textContent = '0'; // Reset mistakes
+            wpm.textContent = '0'; // Reset WPM
+            cpm.textContent = '0'; // Reset CPM
+            let timer;
+            let maxTime = 60;
+            let timeLeft = maxTime;
+            let charIndex = 0;
+            let mistakes = 0;
+            let isTyping = false;
+            // Do something with userInput
+
+        });
+
+        //set value
+        let timer;
+        let maxTime =60;
+        let timeLeft = maxTime;
+        let charIndex = 0;
+        let mistakes = 0;
+        let isTyping = false;
+
+        function loadParagragh(){
+            // Array of paragraphs to choose from
+            
+            const paraGraphs = [
+                "The quick brown fox jumps over the lazy dog.",
+                "Typing fast and accurately is a valuable skill for everyone.",
+                "Practice makes perfect, especially when learning to type quickly.",
+                "Consistent effort leads to steady improvement in typing speed.",
+                "Focus on accuracy before trying to increase your speed.",
+                "Take regular breaks to avoid fatigue while practicing typing.",
+                "Proper posture helps prevent strain during long typing sessions.",
+                "Challenge yourself with new paragraphs to keep practice interesting.",
+                "Set small goals and celebrate your progress along the way.",
+                "Typing games can make learning fun and engaging for all ages.",
+                "Use all your fingers and avoid looking at the keyboard.",
+                "Stay relaxed and breathe deeply to maintain concentration.",
+                "Mistakes are part of the learning process, so do not get discouraged.",
+                "Try to maintain a steady rhythm as you type each word.",
+                "Review your results to identify areas that need improvement.",
+                "A comfortable chair and desk setup can boost your productivity.",
+                "Learning keyboard shortcuts can save time in daily computer use.",
+                "Listening to music can help some people focus while typing.",
+                "Track your words per minute to measure your progress.",
+                "Remember to stretch your hands and fingers regularly.",
+                "Typing is an essential skill for students and professionals alike.",
+                "With patience and practice, anyone can become a fast typist."
+            ];
+            
+            const randomIndex = Math.floor(Math.random() * paraGraphs.length);
+            typingText.innerHTML='';
+            for (const char of paraGraphs[randomIndex]) {
+                console.log(char);
+                typingText.innerHTML += `<span>${char}</span>`;
+            }
+            typingText.querySelectorAll('span')[0].classList.add('active');
+            document.addEventListener('keydown',()=>input.focus());
+            typingText.addEventListener("click",()=>{input.focus()})
+        
+        }
+
+        //handle user input
+
+        function initTyping(){
+            const char = typingText.querySelectorAll('span');
+            const typeChar = input.value.charAt(charIndex);
+
+            if (charIndex < char.length && timeLeft > 0) {
+
+                if (!isTyping) {
+                    timer = setInterval(initTime, 1000);
+                    isTyping = true;
+                }
+
+                // Handle backspace
+                if (input.value.length < charIndex) {
+                    if (charIndex > 0) {
+                        charIndex--;
+                        if (char[charIndex].classList.contains('incorrect')) {
+                            mistakes--;
+                        }
+                        char[charIndex].classList.remove('correct', 'incorrect');
+                        char[charIndex].classList.add('active');
+                        if (charIndex + 1 < char.length) {
+                            char[charIndex + 1].classList.remove('active');
+                        }
+                    }
+                } else {
+                    if (char[charIndex].innerText === typeChar) {
+                        char[charIndex].classList.add('correct');
+                    } else {
+                        mistakes++;
+                        char[charIndex].classList.add('incorrect');
+                    }
+                    char[charIndex].classList.remove('active');
+                    charIndex++;
+                    if (charIndex < char.length) {
+                        char[charIndex].classList.add('active');
+                    }
+                }
+                mistakeSpan.textContent = mistakes;
+                cpm.innerText = charIndex - mistakes;
+            } else {
+                clearInterval(timer);
+                input.value = '';
+            }
+        }
+function initTime(){
+    if(timeLeft > 0){
+        timeLeft--;
+        time.innerText = timeLeft;
+        const wpmVal = Math.round(((charIndex - mistakes) / 5) / (maxTime - timeLeft) * 60);
+        wpm.textContent = wpmVal;
+    }
+    else{
+        clearInterval(timer);
+    }
+}
+
+    function reset(){
+        loadParagragh();
+        clearInterval(timer);
+        timeLeft = maxTime;
+        time.innerText = timeLeft;
+        input.value = '';
+        charIndex = 0;
+        mistakes = 0;
+        isTyping = false;
+        wpm.innerText = 0;
+        cpm.innerText = 0;
+        mistakeSpan.innerText = 0;
+        input.focus();
+    }
+
+        input.addEventListener("input",initTyping);
+        button.addEventListener("click",reset);
+        loadParagragh();
+
+
+
+    </script>
+</body>
+</html>
