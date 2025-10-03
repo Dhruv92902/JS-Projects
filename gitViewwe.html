@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Hub Viewer</title>
+    <style>
+        body {
+            background: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: #fff;
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 32px 24px 24px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h1 {
+            color: #24292e;
+            margin-bottom: 24px;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #d1d5da;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus {
+            border: 1.5px solid #0366d6;
+        }
+        button {
+            background: #2ea44f;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #22863a;
+        }
+        #profile {
+            margin-top: 28px;
+        }
+        #profile h2 {
+            margin: 12px 0 16px 0;
+            color: #0366d6;
+            font-size: 22px;
+        }
+        #profile img {
+            border: 2px solid #d1d5da;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        #profile {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 22px 16px;
+            box-shadow: 0 2px 12px rgba(36,41,46,0.06);
+            display:flex;
+            min-width: 260px;
+            text-align: left;
+        }
+        #profile p {
+            margin: 8px 0;
+            color: #444;
+            font-size: 20px;
+        }
+        #profile a {
+            color: #0366d6;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        #profile a:hover {
+            text-decoration: underline;
+        }
+        #profile img {
+            margin-bottom: 10px;
+            background: #fff;
+        }
+        input[type="text"]::placeholder {
+            color: #bbb;
+            opacity: 1;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #eaeaea;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5da;
+            border-radius: 4px;
+        }
+        .fetchedProfile{
+            margin-left: 50px;
+        }
+        .followsPart {
+            margin-top: 18px;
+            display: flex;
+            gap: 24px;
+            justify-content: flex-start;
+            font-size: 18px;
+        }
+        .followsPart p {
+            margin: 0;
+            padding: 0 8px;
+            background: #eaf5ff;
+            border-radius: 6px;
+            font-weight: 500;
+                        box-shadow: 0 2px 12px rgba(36, 41, 46, 0.336);
+
+        }
+        
+        @media (max-width: 500px) {
+            .container {
+                max-width: 98vw;
+                padding: 18px 6vw 18px 6vw;
+            }
+            #profile {
+                min-width: unset;
+                padding: 14px 4vw;
+            }
+            
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Profile Viewer</h1>
+        <input type="text" id="userName"
+        placeholder="Enter Your Username">
+        <button onclick="fetchProfile()">Get Profile</button>
+        <div id="profile"></div>
+    </div>
+
+    <script>
+        function fetchProfile(){
+            const username =  document.getElementById("userName").value 
+            if(!username){
+                alert("Enter a GitHub username")
+                return
+            }
+
+            fetch(`https://api.github.com/users/${username}`).then(response =>{
+                if(!response.ok){
+                    throw new Error ('Network response is NOt ok')
+                }
+                return response.json();
+            })
+            .then(data=>{
+                displayProfile(data)
+            })
+            .catch(err=>{
+                console.error("There was a problem with the fetch opertion :",err)
+            })
+        }
+
+
+        function displayProfile(profileData){
+            const profileElement = document.getElementById('profile')
+            profileElement.innerHTML = `
+                <div >
+                    <img src="${profileData.avatar_url}" style="width:200px; height:200px; border-radius:50%;" alt="Avatar"/>
+                    <p ><a href="${profileData.html_url}" target="_blank">View on GitHub</a></p>
+                    
+                </div>
+            
+                
+                <div class="fetchedProfile">
+                <h2>${profileData.login}</h2>
+                <p><strong>Name:</strong> ${profileData.name ? profileData.name : "N/A"}</p>
+                <p><strong>Bio:</strong> ${profileData.bio ? profileData.bio : "N/A"}</p>
+                <p><strong>Location:</strong> ${profileData.location ? profileData.location : "N/A"}</p>
+                
+                <p><strong>Company:</strong> ${profileData.company ? profileData.company : "N/A"}</p>
+                <p><strong>Blog:</strong> ${profileData.blog ? `<a href="${profileData.blog}" target="_blank">${profileData.blog}</a>` : "N/A"}</p>
+
+                <div class="followsPart">
+                <p><strong>Public Repos:</strong> ${profileData.public_repos}</p>
+                <p><strong>Followers:</strong> ${profileData.followers}</p>
+                <p><strong>Following:</strong> ${profileData.following}</p>
+                </div>
+                
+                
+                </div>
+                
+            `;
+        }
+        
+    </script>
+    
+</body>
+</html>
