@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Image Resizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: #222;
+            transition: background 0.3s, color 0.3s;
+        }
+        .controls {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 24px 32px;
+            max-width: 500px;
+            margin: 32px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .sizer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            align-items: center;
+        }
+        .sizer input[type="number"] {
+            width: 90px;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            color: #222;
+            transition: background 0.3s, color 0.3s, border 0.3s;
+        }
+        .sizer input[type="range"] {
+            width: 120px;
+        }
+        .sizer label {
+            font-size: 13px;
+            color: #555;
+            margin-right: 12px;
+            transition: color 0.3s;
+        }
+        select {
+            padding: 7px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            background: #fff;
+            color: #222;
+            transition: background 0.3s, color 0.3s, border 0.3s;
+        }
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 4px;
+            background: #0078d7;
+            color: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        .image {
+            display: block;
+            
+            margin: 32px auto 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: #eaeaea;
+            object-fit: contain;
+        }
+        @media (max-width: 600px) {
+            .controls {
+                padding: 14px 8px;
+            }
+            .sizer input[type="range"] {
+                width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="#" class="image" alt="">
+    <div class="controls">
+        <input type="file" id="fileInput" accept="image/*">
+        <div class="sizer">
+            <input type="number" id="widthInput" placeholder="Width (px)" min="1">
+            <input type="range" name="widthRange" id="widthRange" min="1" max="1920" value="500">
+            <label for="widthRange">Width</label>
+            <input type="number" id="heightInput" placeholder="Height (px)" min="1">
+            <input type="range" name="heightRange" id="heightRange" min="1" max="1080" value="500">
+            <label for="heightRange">Height</label>
+        </div>
+        <select name="thumbnail" id="thumbnail">
+            <option value="none">Instagram</option>
+            <option value="small">Twitter</option>
+            <option value="medium">Facebook</option>
+            <option value="large">YouTube</option>
+        </select>
+        <button id="resizeButton">Resize</button>
+        <button id="downloadButton">Download</button>
+    </div>
+
+    <script>
+    const img = document.querySelector('.image');
+    const fileInput = document.getElementById('fileInput');
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+    const widthRange = document.getElementById('widthRange');
+    const heightRange = document.getElementById('heightRange');
+    const thumbnail = document.getElementById('thumbnail');
+    const resizeButton = document.getElementById('resizeButton');
+    const downloadButton = document.getElementById('downloadButton');
+
+    let originalImage = null;
+    let canvas = document.createElement('canvas');
+    let ctx = canvas.getContext('2d');
+
+    const presetSizes = {
+        none: { width: 1080, height: 1080 }, // Instagram
+        small: { width: 600, height: 335 },  // Twitter
+        medium: { width: 1200, height: 628 },// Facebook
+        large: { width: 1280, height: 720 }  // YouTube
+    };
+
+    fileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            img.src = evt.target.result;
+            img.onload = function() {
+                originalImage = new Image();
+                originalImage.src = img.src;
+                widthInput.value = img.naturalWidth;
+                heightInput.value = img.naturalHeight;
+                widthRange.value = img.naturalWidth;
+                heightRange.value = img.naturalHeight;
+                widthRange.max = img.naturalWidth * 2;
+                heightRange.max = img.naturalHeight * 2;
+            };
+        };
+        reader.readAsDataURL(file);
+    });
+
+    widthInput.addEventListener('input', () => {
+        widthRange.value = widthInput.value;
+    });
+    heightInput.addEventListener('input', () => {
+        heightRange.value = heightInput.value;
+    });
+    widthRange.addEventListener('input', () => {
+        widthInput.value = widthRange.value;
+    });
+    heightRange.addEventListener('input', () => {
+        heightInput.value = heightRange.value;
+    });
+
+    thumbnail.addEventListener('change', () => {
+        const preset = presetSizes[thumbnail.value];
+        if (preset) {
+            widthInput.value = preset.width;
+            heightInput.value = preset.height;
+            widthRange.value = preset.width;
+            heightRange.value = preset.height;
+        }
+    });
+
+    resizeButton.addEventListener('click', () => {
+        if (!originalImage) return;
+        const w = parseInt(widthInput.value, 10);
+        const h = parseInt(heightInput.value, 10);
+        canvas.width = w;
+        canvas.height = h;
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(originalImage, 0, 0, w, h);
+        img.src = canvas.toDataURL();
+        // Update originalImage to the new resized image
+        originalImage.src = img.src;
+        originalImage.onload = function() {
+            widthInput.value = originalImage.naturalWidth;
+            heightInput.value = originalImage.naturalHeight;
+            widthRange.value = originalImage.naturalWidth;
+            heightRange.value = originalImage.naturalHeight;
+        };
+    });
+
+    downloadButton.addEventListener('click', () => {
+        if (!img.src || img.src === '#') return;
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.download = 'resized-image.png';
+        link.click();
+    });
+    </script>
+    
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
